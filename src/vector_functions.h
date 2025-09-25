@@ -32,8 +32,8 @@
 //       alex@minres.com - initial API and implementation
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _VM_VECTOR_FUNCTIONS_H_
-#define _VM_VECTOR_FUNCTIONS_H_
+#ifndef VECTOR_FUNCTIONS_H
+#define VECTOR_FUNCTIONS_H
 #include <cstdint>
 #include <functional>
 #include <stdint.h>
@@ -183,4 +183,4 @@ template <unsigned VLEN, unsigned EGS, typename elem_type_t>
 void vector_crypto(uint8_t* V, unsigned funct6, uint64_t eg_len, uint64_t eg_start, vtype_t vtype, unsigned vd, unsigned vs2, unsigned vs1);
 } // namespace softvector
 #include "vector_functions.hpp"
-#endif /* _VM_VECTOR_FUNCTIONS_H_ */
+#endif /* VM_VECTOR_FUNCTIONS_H */

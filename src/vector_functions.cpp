@@ -32,22 +32,21 @@
 //       alex@minres.com - initial API and implementation
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "vm/aes_sbox.h"
 #include <algorithm>
 #include <cassert>
+#include <crypto_util.h>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <limits>
 #include <math.h>
 #include <stdexcept>
-#include <util/ities.h>
 #include <vector>
 #include <vector_functions.h>
 
 namespace softvector {
 
-vtype_t::vtype_t(uint32_t vtype_val) { underlying = (vtype_val & 0x8000) << 32 | (vtype_val & ~0x8000); }
+vtype_t::vtype_t(uint32_t vtype_val) { underlying = (uint64_t)(vtype_val & 0x8000) << 32 | (vtype_val & ~0x8000); }
 vtype_t::vtype_t(uint64_t vtype_val) { underlying = vtype_val; }
 bool vtype_t::vill() { return underlying >> 63; }
 bool vtype_t::vma() { return (underlying >> 7) & 1; }
@@ -85,187 +84,6 @@ vmask_view read_vmask(uint8_t* V, uint16_t VLEN, uint16_t elem_count, uint8_t re
     uint8_t* mask_start = V + VLEN / 8 * reg_idx;
     assert(mask_start + elem_count / 8 <= V + VLEN * RFS / 8);
     return {mask_start, elem_count};
-}
-uint8_t xt2(uint8_t x) { return (x << 1) ^ (bit_sub<7, 1>(x) ? 27 : 0); }
-
-uint8_t xt3(uint8_t x) { return x ^ xt2(x); }
-
-uint8_t gfmul(uint8_t x, uint8_t y) {
-    return (bit_sub<0, 1>(y) ? x : 0) ^ (bit_sub<1, 1>(y) ? xt2(x) : 0) ^ (bit_sub<2, 1>(y) ? xt2(xt2(x)) : 0) ^
-           (bit_sub<3, 1>(y) ? xt2(xt2(xt2(x))) : 0);
-}
-
-uint32_t aes_mixcolumn_byte_fwd(uint8_t so) {
-    return ((uint32_t)gfmul(so, 3) << 24) | ((uint32_t)so << 16) | ((uint32_t)so << 8) | gfmul(so, 2);
-}
-
-uint32_t aes_mixcolumn_byte_inv(uint8_t so) {
-    return ((uint32_t)gfmul(so, 11) << 24) | ((uint32_t)gfmul(so, 13) << 16) | ((uint32_t)gfmul(so, 9) << 8) | gfmul(so, 14);
-}
-
-uint32_t aes_mixcolumn_fwd(uint32_t x) {
-    uint8_t s0 = bit_sub<0, 7 - 0 + 1>(x);
-    uint8_t s1 = bit_sub<8, 15 - 8 + 1>(x);
-    uint8_t s2 = bit_sub<16, 23 - 16 + 1>(x);
-    uint8_t s3 = bit_sub<24, 31 - 24 + 1>(x);
-    uint8_t b0 = xt2(s0) ^ xt3(s1) ^ (s2) ^ (s3);
-    uint8_t b1 = (s0) ^ xt2(s1) ^ xt3(s2) ^ (s3);
-    uint8_t b2 = (s0) ^ (s1) ^ xt2(s2) ^ xt3(s3);
-    uint8_t b3 = xt3(s0) ^ (s1) ^ (s2) ^ xt2(s3);
-    return ((uint32_t)b3 << 24) | ((uint32_t)b2 << 16) | ((uint32_t)b1 << 8) | b0;
-}
-
-uint32_t aes_mixcolumn_inv(uint32_t x) {
-    uint8_t s0 = bit_sub<0, 7 - 0 + 1>(x);
-    uint8_t s1 = bit_sub<8, 15 - 8 + 1>(x);
-    uint8_t s2 = bit_sub<16, 23 - 16 + 1>(x);
-    uint8_t s3 = bit_sub<24, 31 - 24 + 1>(x);
-    uint8_t b0 = gfmul(s0, 14) ^ gfmul(s1, 11) ^ gfmul(s2, 13) ^ gfmul(s3, 9);
-    uint8_t b1 = gfmul(s0, 9) ^ gfmul(s1, 14) ^ gfmul(s2, 11) ^ gfmul(s3, 13);
-    uint8_t b2 = gfmul(s0, 13) ^ gfmul(s1, 9) ^ gfmul(s2, 14) ^ gfmul(s3, 11);
-    uint8_t b3 = gfmul(s0, 11) ^ gfmul(s1, 13) ^ gfmul(s2, 9) ^ gfmul(s3, 14);
-    return ((uint32_t)b3 << 24) | ((uint32_t)b2 << 16) | ((uint32_t)b1 << 8) | b0;
-}
-
-uint32_t aes_decode_rcon(uint8_t r) {
-    switch(r) {
-    case 0:
-        return 1;
-    case 1:
-        return 2;
-    case 2:
-        return 4;
-    case 3:
-        return 8;
-    case 4:
-        return 16;
-    case 5:
-        return 32;
-    case 6:
-        return 64;
-    case 7:
-        return 128;
-    case 8:
-        return 27;
-    case 9:
-        return 54;
-    }
-    return 0;
-}
-
-uint32_t aes_subword_fwd(uint32_t x) {
-    return ((uint32_t)aes_sbox_fwd(bit_sub<24, 31 - 24 + 1>(x)) << 24) | ((uint32_t)aes_sbox_fwd(bit_sub<16, 23 - 16 + 1>(x)) << 16) |
-           ((uint32_t)aes_sbox_fwd(bit_sub<8, 15 - 8 + 1>(x)) << 8) | aes_sbox_fwd(bit_sub<0, 7 - 0 + 1>(x));
-}
-
-uint32_t aes_subword_inv(uint32_t x) {
-    return ((uint32_t)aes_sbox_inv(bit_sub<24, 31 - 24 + 1>(x)) << 24) | ((uint32_t)aes_sbox_inv(bit_sub<16, 23 - 16 + 1>(x)) << 16) |
-           ((uint32_t)aes_sbox_inv(bit_sub<8, 15 - 8 + 1>(x)) << 8) | aes_sbox_inv(bit_sub<0, 7 - 0 + 1>(x));
-}
-
-uint32_t aes_get_column(__uint128_t state, unsigned c) {
-    assert(c < 4);
-    return static_cast<uint32_t>(state >> (32 * c));
-};
-
-uint64_t aes_apply_fwd_sbox_to_each_byte(uint64_t x) {
-    return ((uint64_t)aes_sbox_fwd(bit_sub<56, 63 - 56 + 1>(x)) << 56) | ((uint64_t)aes_sbox_fwd(bit_sub<48, 55 - 48 + 1>(x)) << 48) |
-           ((uint64_t)aes_sbox_fwd(bit_sub<40, 47 - 40 + 1>(x)) << 40) | ((uint64_t)aes_sbox_fwd(bit_sub<32, 39 - 32 + 1>(x)) << 32) |
-           ((uint64_t)aes_sbox_fwd(bit_sub<24, 31 - 24 + 1>(x)) << 24) | ((uint64_t)aes_sbox_fwd(bit_sub<16, 23 - 16 + 1>(x)) << 16) |
-           ((uint64_t)aes_sbox_fwd(bit_sub<8, 15 - 8 + 1>(x)) << 8) | aes_sbox_fwd(bit_sub<0, 7 - 0 + 1>(x));
-}
-
-uint64_t aes_apply_inv_sbox_to_each_byte(uint64_t x) {
-    return ((uint64_t)aes_sbox_inv(bit_sub<56, 63 - 56 + 1>(x)) << 56) | ((uint64_t)aes_sbox_inv(bit_sub<48, 55 - 48 + 1>(x)) << 48) |
-           ((uint64_t)aes_sbox_inv(bit_sub<40, 47 - 40 + 1>(x)) << 40) | ((uint64_t)aes_sbox_inv(bit_sub<32, 39 - 32 + 1>(x)) << 32) |
-           ((uint64_t)aes_sbox_inv(bit_sub<24, 31 - 24 + 1>(x)) << 24) | ((uint64_t)aes_sbox_inv(bit_sub<16, 23 - 16 + 1>(x)) << 16) |
-           ((uint64_t)aes_sbox_inv(bit_sub<8, 15 - 8 + 1>(x)) << 8) | aes_sbox_inv(bit_sub<0, 7 - 0 + 1>(x));
-}
-
-uint64_t aes_rv64_shiftrows_fwd(uint64_t rs2, uint64_t rs1) {
-    return ((uint64_t)bit_sub<24, 31 - 24 + 1>(rs1) << 56) | ((uint64_t)bit_sub<48, 55 - 48 + 1>(rs2) << 48) |
-           ((uint64_t)bit_sub<8, 15 - 8 + 1>(rs2) << 40) | ((uint64_t)bit_sub<32, 39 - 32 + 1>(rs1) << 32) |
-           ((uint64_t)bit_sub<56, 63 - 56 + 1>(rs2) << 24) | ((uint64_t)bit_sub<16, 23 - 16 + 1>(rs2) << 16) |
-           ((uint64_t)bit_sub<40, 47 - 40 + 1>(rs1) << 8) | bit_sub<0, 7 - 0 + 1>(rs1);
-}
-
-uint64_t aes_rv64_shiftrows_inv(uint64_t rs2, uint64_t rs1) {
-    return ((uint64_t)bit_sub<24, 31 - 24 + 1>(rs2) << 56) | ((uint64_t)bit_sub<48, 55 - 48 + 1>(rs2) << 48) |
-           ((uint64_t)bit_sub<8, 15 - 8 + 1>(rs1) << 40) | ((uint64_t)bit_sub<32, 39 - 32 + 1>(rs1) << 32) |
-           ((uint64_t)bit_sub<56, 63 - 56 + 1>(rs1) << 24) | ((uint64_t)bit_sub<16, 23 - 16 + 1>(rs2) << 16) |
-           ((uint64_t)bit_sub<40, 47 - 40 + 1>(rs2) << 8) | bit_sub<0, 7 - 0 + 1>(rs1);
-}
-
-uint128_t aes_shift_rows_fwd(uint128_t x) {
-    uint32_t ic3 = aes_get_column(x, 3);
-    uint32_t ic2 = aes_get_column(x, 2);
-    uint32_t ic1 = aes_get_column(x, 1);
-    uint32_t ic0 = aes_get_column(x, 0);
-    uint32_t oc0 = ((uint32_t)bit_sub<24, 31 - 24 + 1>(ic3) << 24) | ((uint32_t)bit_sub<16, 23 - 16 + 1>(ic2) << 16) |
-                   ((uint32_t)bit_sub<8, 15 - 8 + 1>(ic1) << 8) | bit_sub<0, 7 - 0 + 1>(ic0);
-    uint32_t oc1 = ((uint32_t)bit_sub<24, 31 - 24 + 1>(ic0) << 24) | ((uint32_t)bit_sub<16, 23 - 16 + 1>(ic3) << 16) |
-                   ((uint32_t)bit_sub<8, 15 - 8 + 1>(ic2) << 8) | bit_sub<0, 7 - 0 + 1>(ic1);
-    uint32_t oc2 = ((uint32_t)bit_sub<24, 31 - 24 + 1>(ic1) << 24) | ((uint32_t)bit_sub<16, 23 - 16 + 1>(ic0) << 16) |
-                   ((uint32_t)bit_sub<8, 15 - 8 + 1>(ic3) << 8) | bit_sub<0, 7 - 0 + 1>(ic2);
-    uint32_t oc3 = ((uint32_t)bit_sub<24, 31 - 24 + 1>(ic2) << 24) | ((uint32_t)bit_sub<16, 23 - 16 + 1>(ic1) << 16) |
-                   ((uint32_t)bit_sub<8, 15 - 8 + 1>(ic0) << 8) | bit_sub<0, 7 - 0 + 1>(ic3);
-    return ((uint128_t)oc3 << 96) | ((uint128_t)oc2 << 64) | ((uint128_t)oc1 << 32) | oc0;
-}
-
-uint128_t aes_shift_rows_inv(uint128_t x) {
-    uint32_t ic3 = aes_get_column(x, 3);
-    uint32_t ic2 = aes_get_column(x, 2);
-    uint32_t ic1 = aes_get_column(x, 1);
-    uint32_t ic0 = aes_get_column(x, 0);
-    uint32_t oc0 = ((uint32_t)bit_sub<24, 31 - 24 + 1>(ic1) << 24) | ((uint32_t)bit_sub<16, 23 - 16 + 1>(ic2) << 16) |
-                   ((uint32_t)bit_sub<8, 15 - 8 + 1>(ic3) << 8) | bit_sub<0, 7 - 0 + 1>(ic0);
-    uint32_t oc1 = ((uint32_t)bit_sub<24, 31 - 24 + 1>(ic2) << 24) | ((uint32_t)bit_sub<16, 23 - 16 + 1>(ic3) << 16) |
-                   ((uint32_t)bit_sub<8, 15 - 8 + 1>(ic0) << 8) | bit_sub<0, 7 - 0 + 1>(ic1);
-    uint32_t oc2 = ((uint32_t)bit_sub<24, 31 - 24 + 1>(ic3) << 24) | ((uint32_t)bit_sub<16, 23 - 16 + 1>(ic0) << 16) |
-                   ((uint32_t)bit_sub<8, 15 - 8 + 1>(ic1) << 8) | bit_sub<0, 7 - 0 + 1>(ic2);
-    uint32_t oc3 = ((uint32_t)bit_sub<24, 31 - 24 + 1>(ic0) << 24) | ((uint32_t)bit_sub<16, 23 - 16 + 1>(ic1) << 16) |
-                   ((uint32_t)bit_sub<8, 15 - 8 + 1>(ic2) << 8) | bit_sub<0, 7 - 0 + 1>(ic3);
-    return ((uint128_t)oc3 << 96) | ((uint128_t)oc2 << 64) | ((uint128_t)oc1 << 32) | oc0;
-}
-
-uint128_t aes_subbytes_fwd(uint128_t x) {
-    uint32_t oc0 = aes_subword_fwd(aes_get_column(x, 0));
-    uint32_t oc1 = aes_subword_fwd(aes_get_column(x, 1));
-    uint32_t oc2 = aes_subword_fwd(aes_get_column(x, 2));
-    uint32_t oc3 = aes_subword_fwd(aes_get_column(x, 3));
-    return ((uint128_t)oc3 << 96) | ((uint128_t)oc2 << 64) | ((uint128_t)oc1 << 32) | oc0;
-}
-
-uint128_t aes_subbytes_inv(uint128_t x) {
-    uint32_t oc0 = aes_subword_inv(aes_get_column(x, 0));
-    uint32_t oc1 = aes_subword_inv(aes_get_column(x, 1));
-    uint32_t oc2 = aes_subword_inv(aes_get_column(x, 2));
-    uint32_t oc3 = aes_subword_inv(aes_get_column(x, 3));
-    return ((uint128_t)oc3 << 96) | ((uint128_t)oc2 << 64) | ((uint128_t)oc1 << 32) | oc0;
-}
-
-uint128_t aes_mixcolumns_fwd(uint128_t x) {
-    uint32_t oc0 = aes_mixcolumn_fwd(aes_get_column(x, 0));
-    uint32_t oc1 = aes_mixcolumn_fwd(aes_get_column(x, 1));
-    uint32_t oc2 = aes_mixcolumn_fwd(aes_get_column(x, 2));
-    uint32_t oc3 = aes_mixcolumn_fwd(aes_get_column(x, 3));
-    return ((uint128_t)oc3 << 96) | ((uint128_t)oc2 << 64) | ((uint128_t)oc1 << 32) | oc0;
-}
-
-uint128_t aes_mixcolumns_inv(uint128_t x) {
-    uint32_t oc0 = aes_mixcolumn_inv(aes_get_column(x, 0));
-    uint32_t oc1 = aes_mixcolumn_inv(aes_get_column(x, 1));
-    uint32_t oc2 = aes_mixcolumn_inv(aes_get_column(x, 2));
-    uint32_t oc3 = aes_mixcolumn_inv(aes_get_column(x, 3));
-    return ((uint128_t)oc3 << 96) | ((uint128_t)oc2 << 64) | ((uint128_t)oc1 << 32) | oc0;
-}
-
-uint32_t aes_rotword(uint32_t x) {
-    uint8_t a0 = bit_sub<0, 7 - 0 + 1>(x);
-    uint8_t a1 = bit_sub<8, 15 - 8 + 1>(x);
-    uint8_t a2 = bit_sub<16, 23 - 16 + 1>(x);
-    uint8_t a3 = bit_sub<24, 31 - 24 + 1>(x);
-    return ((uint32_t)a0 << 24) | ((uint32_t)a3 << 16) | ((uint32_t)a2 << 8) | a1;
 }
 
 std::function<uint128_t(uint128_t, uint128_t, uint128_t)> get_crypto_funct(unsigned funct6, unsigned vs1) {

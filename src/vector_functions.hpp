@@ -47,7 +47,7 @@ extern "C" {
 #include <stdexcept>
 #include <type_traits>
 #include <vector_functions.h>
-#ifndef _VM_VECTOR_FUNCTIONS_H_
+#ifndef VECTOR_FUNCTIONS_H
 #error __FILE__ should only be included from vector_functions.h
 #endif
 #include <math.h>

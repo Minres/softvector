@@ -32,8 +32,8 @@
 //       eyck@minres.com - initial API and implementation
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef RISCV_SRC_VM_FP_FUNCTIONS_H_
-#define RISCV_SRC_VM_FP_FUNCTIONS_H_
+#ifndef FP_FUNCTIONS_H
+#define FP_FUNCTIONS_H
 
 #include <stdint.h>
 
@@ -122,4 +122,4 @@ uint32_t i64tof32(uint64_t v, uint8_t rm);
 uint64_t i32tof64(uint32_t v, uint8_t rm);
 uint64_t i64tof64(uint64_t v, uint8_t rm);
 }
-#endif /* RISCV_SRC_VM_FP_FUNCTIONS_H_ */
+#endif /* FP_FUNCTIONS_H */

@@ -1,0 +1,3 @@
+/home/alex/git/DBT-RISE-RISCV/softfloat/install/lib/static/libsoftfloat.a
+/home/alex/git/DBT-RISE-RISCV/softfloat/install/include/softfloat.h
+/home/alex/git/DBT-RISE-RISCV/softfloat/install/include/softfloat_types.h

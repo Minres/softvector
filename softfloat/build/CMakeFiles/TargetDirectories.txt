@@ -1,0 +1,7 @@
+/home/alex/git/DBT-RISE-RISCV/softfloat/build/CMakeFiles/softfloat.dir
+/home/alex/git/DBT-RISE-RISCV/softfloat/build/CMakeFiles/edit_cache.dir
+/home/alex/git/DBT-RISE-RISCV/softfloat/build/CMakeFiles/rebuild_cache.dir
+/home/alex/git/DBT-RISE-RISCV/softfloat/build/CMakeFiles/list_install_components.dir
+/home/alex/git/DBT-RISE-RISCV/softfloat/build/CMakeFiles/install.dir
+/home/alex/git/DBT-RISE-RISCV/softfloat/build/CMakeFiles/install/local.dir
+/home/alex/git/DBT-RISE-RISCV/softfloat/build/CMakeFiles/install/strip.dir
