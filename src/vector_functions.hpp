@@ -2105,28 +2105,7 @@ void vector_imm_crypto(uint8_t* V, unsigned funct6, uint64_t eg_len, uint64_t eg
         for(size_t idx = eg_len; idx < vlmax; idx++)
             vd_view[idx] = agnostic_behavior(vd_view[idx]);
 }
-template <typename T> T rotr(T x, unsigned n) {
-    assert(n < sizeof(T) * 8);
-    return (x >> n) | (x << (sizeof(T) * 8 - n));
-}
-template <typename T> T shr(T x, unsigned n) {
-    assert(n < sizeof(T) * 8);
-    return (x >> n);
-}
-template <typename T> T sum0(T);
-template <> inline uint32_t sum0(uint32_t x) { return rotr(x, 2) ^ rotr(x, 13) ^ rotr(x, 22); }
-template <> inline uint64_t sum0(uint64_t x) { return rotr(x, 28) ^ rotr(x, 34) ^ rotr(x, 39); }
-template <typename T> T sum1(T);
-template <> inline uint32_t sum1(uint32_t x) { return rotr(x, 6) ^ rotr(x, 11) ^ rotr(x, 25); }
-template <> inline uint64_t sum1(uint64_t x) { return rotr(x, 14) ^ rotr(x, 18) ^ rotr(x, 41); }
-template <typename T> T ch(T x, T y, T z) { return ((x & y) ^ ((~x) & z)); }
-template <typename T> T maj(T x, T y, T z) { return ((x & y) ^ (x & z) ^ (y & z)); }
-template <typename T> T sig0(T);
-template <> inline uint32_t sig0(uint32_t x) { return rotr(x, 7) ^ rotr(x, 18) ^ shr(x, 3); }
-template <> inline uint64_t sig0(uint64_t x) { return rotr(x, 1) ^ rotr(x, 8) ^ shr(x, 7); }
-template <typename T> T sig1(T);
-template <> inline uint32_t sig1(uint32_t x) { return rotr(x, 17) ^ rotr(x, 19) ^ shr(x, 10); }
-template <> inline uint64_t sig1(uint64_t x) { return rotr(x, 19) ^ rotr(x, 61) ^ shr(x, 6); }
+
 template <typename T> std::function<void(vreg_view<T>&, vreg_view<T>&, vreg_view<T>&)> get_crypto_funct(unsigned int funct6) {
     switch(funct6) {
     case 0b101110: // VSHA2CH
@@ -2256,26 +2235,4 @@ void vector_crypto(uint8_t* V, unsigned funct6, uint64_t eg_len, uint64_t eg_sta
     }
 }
 
-template <typename dest_elem_t, typename src_elem_t> dest_elem_t brev(src_elem_t vs2) {
-    constexpr dest_elem_t bits = sizeof(src_elem_t) * 8;
-    dest_elem_t result = 0;
-    for(size_t i = 0; i < bits; ++i) {
-        result <<= 1;
-        result |= (vs2 & 1);
-        vs2 >>= 1;
-    }
-    return result;
-};
-template <typename dest_elem_t, typename src_elem_t> dest_elem_t brev8(src_elem_t vs2) {
-    constexpr unsigned byte_count = sizeof(src_elem_t);
-    dest_elem_t result = 0;
-    for(size_t i = 0; i < byte_count; ++i) {
-        dest_elem_t byte = (vs2 >> (i * 8)) & 0xFF;
-        byte = ((byte & 0xF0) >> 4) | ((byte & 0x0F) << 4);
-        byte = ((byte & 0xCC) >> 2) | ((byte & 0x33) << 2);
-        byte = ((byte & 0xAA) >> 1) | ((byte & 0x55) << 1);
-        result |= byte << (i * 8);
-    }
-    return result;
-};
 } // namespace softvector
