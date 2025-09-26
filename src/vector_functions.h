@@ -183,4 +183,4 @@ template <unsigned VLEN, unsigned EGS, typename elem_type_t>
 void vector_crypto(uint8_t* V, unsigned funct6, uint64_t eg_len, uint64_t eg_start, vtype_t vtype, unsigned vd, unsigned vs2, unsigned vs1);
 } // namespace softvector
 #include "vector_functions.hpp"
-#endif /* VM_VECTOR_FUNCTIONS_H */
+#endif /* VECTOR_FUNCTIONS_H */

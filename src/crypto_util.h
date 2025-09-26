@@ -32,6 +32,8 @@
 //       alex@minres.com - initial API and implementation
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifndef CRYPTO_UTIL_H
+#define CRYPTO_UTIL_H
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -41,6 +43,7 @@ using int128_t = __int128;
 using uint128_t = unsigned __int128;
 #endif
 
+namespace softvector {
 uint8_t xt2(uint8_t x);
 uint8_t xt3(uint8_t x);
 uint8_t gfmul(uint8_t x, uint8_t y);
@@ -96,7 +99,7 @@ template <typename dest_elem_t, typename src_elem_t> dest_elem_t brev(src_elem_t
         vs2 >>= 1;
     }
     return result;
-};
+}
 template <typename dest_elem_t, typename src_elem_t> dest_elem_t brev8(src_elem_t vs2) {
     constexpr unsigned byte_count = sizeof(src_elem_t);
     dest_elem_t result = 0;
@@ -108,4 +111,6 @@ template <typename dest_elem_t, typename src_elem_t> dest_elem_t brev8(src_elem_
         result |= byte << (i * 8);
     }
     return result;
-};
+}
+} // namespace softvector
+#endif // CRYPTO_UTIL_H

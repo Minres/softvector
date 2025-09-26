@@ -38,6 +38,7 @@ extern "C" {
 #include "softfloat_types.h"
 #include "specialize.h"
 #include <cassert>
+#include <crypto_util.h>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -603,6 +604,8 @@ std::function<dest_elem_t(src2_elem_t)> get_unary_fn(unsigned unary_op) {
         return [](src2_elem_t vs2) { return brev<dest_elem_t>(vs2); };
     case 0b01100: // VCLZ
         return [](src2_elem_t vs2) {
+            if(vs2 == 0) // builtin is undefined for value '0'
+                return static_cast<dest_elem_t>(sizeof(src2_elem_t) * 8);
             if(std::is_same_v<src2_elem_t, unsigned int>)
                 return static_cast<dest_elem_t>(__builtin_clz(vs2));
             else if(std::is_same_v<src2_elem_t, unsigned long>)
@@ -611,8 +614,6 @@ std::function<dest_elem_t(src2_elem_t)> get_unary_fn(unsigned unary_op) {
                 return static_cast<dest_elem_t>(__builtin_clzll(vs2));
             else {
                 constexpr dest_elem_t bits = sizeof(src2_elem_t) * 8;
-                if(vs2 == 0)
-                    return bits;
                 dest_elem_t count = 0;
                 for(size_t i = bits - 1; i >= 0; --i) {
                     if((vs2 >> i) & 1)
@@ -624,6 +625,8 @@ std::function<dest_elem_t(src2_elem_t)> get_unary_fn(unsigned unary_op) {
         };
     case 0b01101: // VCTZ
         return [](src2_elem_t vs2) {
+            if(vs2 == 0) // builtin is undefined for value '0'
+                return static_cast<dest_elem_t>(sizeof(src2_elem_t) * 8);
             if(std::is_same_v<src2_elem_t, unsigned int>)
                 return static_cast<dest_elem_t>(__builtin_ctz(vs2));
             else if(std::is_same_v<src2_elem_t, unsigned long>)
@@ -632,8 +635,6 @@ std::function<dest_elem_t(src2_elem_t)> get_unary_fn(unsigned unary_op) {
                 return static_cast<dest_elem_t>(__builtin_ctzll(vs2));
             else {
                 constexpr dest_elem_t bits = sizeof(src2_elem_t) * 8;
-                if(vs2 == 0)
-                    return bits;
                 dest_elem_t count = 0;
                 while((vs2 & 1) == 0) {
                     ++count;

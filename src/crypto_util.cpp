@@ -41,6 +41,7 @@
 using int128_t = __int128;
 using uint128_t = unsigned __int128;
 #endif
+namespace softvector {
 template <unsigned int bit, unsigned int width, typename T>
 constexpr typename std::enable_if<std::is_unsigned<T>::value, T>::type bit_sub(T v) {
     static_assert((bit + width) <= 8 * sizeof(T));
@@ -264,3 +265,4 @@ uint32_t aes_rotword(uint32_t x) {
     uint8_t a3 = bit_sub<24, 31 - 24 + 1>(x);
     return ((uint32_t)a0 << 24) | ((uint32_t)a3 << 16) | ((uint32_t)a2 << 8) | a1;
 }
+} // namespace softvector

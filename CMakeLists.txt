@@ -8,7 +8,7 @@ set(VERSION "1.0")
 
 add_subdirectory(softfloat)
 
-set(LIB_HEADERS src/fp_functions.h src/vector_functions.h)
+set(LIB_HEADERS src/fp_functions.h src/vector_functions.h src/crypto_util.h)
 set(VECTOR
     src/vector_functions.cpp
 )
