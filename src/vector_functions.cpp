@@ -152,10 +152,6 @@ std::function<uint128_t(uint128_t, uint128_t, uint128_t)> get_crypto_funct(unsig
         throw new std::runtime_error("Unsupported operation in get_crypto_funct");
     case 0b100010: // VAESKF1
         return [](uint128_t vd, uint128_t vs2, uint128_t r) {
-            auto extract_word = [](const uint128_t& value, int index) -> uint32_t {
-                return static_cast<uint32_t>((value >> (32 * index)) & std::numeric_limits<uint32_t>::max());
-            };
-
             uint32_t k0 = (vs2 >> 32 * 0) & std::numeric_limits<uint32_t>::max();
             uint32_t k1 = (vs2 >> 32 * 1) & std::numeric_limits<uint32_t>::max();
             uint32_t k2 = (vs2 >> 32 * 2) & std::numeric_limits<uint32_t>::max();
