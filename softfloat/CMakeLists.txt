@@ -69,6 +69,10 @@ set(SPECIALIZE
 )
 
 set(OTHERS
+    source/bf16_to_f32.c
+    source/f32_to_bf16.c
+    source/bf16_isSignalingNaN.c
+    source/s_roundPackToBF16.c
     source/s_roundToUI32.c
     source/s_roundToUI64.c
     source/s_roundToI32.c
