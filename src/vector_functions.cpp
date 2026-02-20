@@ -46,46 +46,6 @@
 
 namespace softvector {
 
-vtype_t::vtype_t(uint32_t vtype_val) { underlying = (uint64_t)(vtype_val & 0x8000) << 32 | (vtype_val & ~0x8000); }
-vtype_t::vtype_t(uint64_t vtype_val) { underlying = vtype_val; }
-bool vtype_t::vill() { return underlying >> 63; }
-bool vtype_t::vma() { return (underlying >> 7) & 1; }
-bool vtype_t::vta() { return (underlying >> 6) & 1; }
-unsigned vtype_t::sew() {
-    uint8_t vsew = (underlying >> 3) & 0b111;
-    // pow(2, 3 + vsew);
-    return 1 << (3 + vsew);
-}
-double vtype_t::lmul() {
-    uint8_t vlmul = underlying & 0b111;
-    assert(vlmul != 0b100); // reserved encoding
-    int8_t signed_vlmul = (vlmul >> 2) ? 0b11111000 | vlmul : vlmul;
-    return pow(2, signed_vlmul);
-}
-
-mask_bit_reference& mask_bit_reference::operator=(const bool new_value) {
-    *start = *start & ~(1U << pos) | static_cast<unsigned>(new_value) << pos;
-    return *this;
-}
-
-mask_bit_reference::mask_bit_reference(uint8_t* start, uint8_t pos)
-: start(start)
-, pos(pos) {
-    assert(pos < 8 && "Bit reference can only be initialized for bytes");
-};
-mask_bit_reference::operator bool() const { return *(start) & (1U << (pos)); }
-
-mask_bit_reference vmask_view::operator[](size_t idx) const {
-    assert(idx < elem_count);
-    return {start + idx / 8, static_cast<uint8_t>(idx % 8)};
-}
-
-vmask_view read_vmask(uint8_t* V, uint16_t VLEN, uint16_t elem_count, uint8_t reg_idx) {
-    uint8_t* mask_start = V + VLEN / 8 * reg_idx;
-    assert(mask_start + elem_count / 8 <= V + VLEN * RFS / 8);
-    return {mask_start, elem_count};
-}
-
 std::function<uint128_t(uint128_t, uint128_t, uint128_t)> get_crypto_funct(unsigned funct6, unsigned vs1) {
     switch(funct6) {
     case 0b101000: // VAES.VV
