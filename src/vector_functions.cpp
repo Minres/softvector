@@ -87,7 +87,7 @@ std::function<uint128_t(uint128_t, uint128_t, uint128_t)> get_crypto_funct(unsig
                 return ark;
             };
         case 0b10000: // VSM4R
-            throw new std::runtime_error("Unsupported operation in get_crypto_funct");
+            throw std::runtime_error("Unsupported operation in get_crypto_funct");
         case 0b10001: // VGMUL
             return [](uint128_t vd, uint128_t vs2, uint128_t) {
                 uint128_t Y = brev8<uint128_t>(vd);
@@ -105,11 +105,11 @@ std::function<uint128_t(uint128_t, uint128_t, uint128_t)> get_crypto_funct(unsig
                 return result;
             };
         default:
-            throw new std::runtime_error("Unsupported operation in get_crypto_funct");
+            throw std::runtime_error("Unsupported operation in get_crypto_funct");
         }
     case 0b100000: // VSM3ME
     case 0b100001: // VSM4K
-        throw new std::runtime_error("Unsupported operation in get_crypto_funct");
+        throw std::runtime_error("Unsupported operation in get_crypto_funct");
     case 0b100010: // VAESKF1
         return [](uint128_t vd, uint128_t vs2, uint128_t r) {
             uint32_t k0 = (vs2 >> 32 * 0) & std::numeric_limits<uint32_t>::max();
@@ -141,7 +141,7 @@ std::function<uint128_t(uint128_t, uint128_t, uint128_t)> get_crypto_funct(unsig
             return result;
         };
     case 0b101011: // VSM3C
-        throw new std::runtime_error("Unsupported operation in get_crypto_funct");
+        throw std::runtime_error("Unsupported operation in get_crypto_funct");
     case 0b101100: // VGHSH
         return [](uint128_t Y, uint128_t vs2, uint128_t X) {
             auto H = brev8<uint128_t>(vs2);
@@ -162,7 +162,7 @@ std::function<uint128_t(uint128_t, uint128_t, uint128_t)> get_crypto_funct(unsig
     case 0b101110: // VSHA2CH
     case 0b101111: // VSHA2CL
     default:
-        throw new std::runtime_error("Unknown funct6 in get_crypto_funct");
+        throw std::runtime_error("Unknown funct6 in get_crypto_funct");
     }
 }
 } // namespace softvector

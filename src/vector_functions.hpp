@@ -255,7 +255,7 @@ std::function<dest_elem_t(dest_elem_t, src2_elem_t, src1_elem_t)> get_funct(unsi
                 return static_cast<dest_elem_t>(vs2) << (vs1 & (shift_mask<dest_elem_t>()));
             };
         default:
-            throw new std::runtime_error("Unknown funct6 in get_funct");
+            throw std::runtime_error("Unknown funct6 in get_funct");
         }
     else if(funct3 == OPMVV || funct3 == OPMVX)
         switch(funct6) {
@@ -382,10 +382,10 @@ std::function<dest_elem_t(dest_elem_t, src2_elem_t, src1_elem_t)> get_funct(unsi
                 return output;
             };
         default:
-            throw new std::runtime_error("Unknown funct6 in get_funct");
+            throw std::runtime_error("Unknown funct6 in get_funct");
         }
     else
-        throw new std::runtime_error("Unknown funct3 in get_funct");
+        throw std::runtime_error("Unknown funct3 in get_funct");
 }
 template <unsigned VLEN, typename dest_elem_t, typename src2_elem_t, typename src1_elem_t>
 void vector_vector_op(uint8_t* V, unsigned funct6, unsigned funct3, uint64_t vl, uint64_t vstart, vtype_t vtype, bool vm, unsigned vd,
@@ -511,7 +511,7 @@ template <typename elem_t> std::function<bool(elem_t, elem_t)> get_mask_funct(un
             };
 
         default:
-            throw new std::runtime_error("Unknown funct6 in get_mask_funct");
+            throw std::runtime_error("Unknown funct6 in get_mask_funct");
         }
     else if(funct3 == OPMVV || funct3 == OPMVX)
         switch(funct6) {
@@ -532,10 +532,10 @@ template <typename elem_t> std::function<bool(elem_t, elem_t)> get_mask_funct(un
         case 0b011111: // VMXNOR
             return [](elem_t vs2, elem_t vs1) { return !(vs2 ^ vs1); };
         default:
-            throw new std::runtime_error("Unknown funct6 in get_mask_funct");
+            throw std::runtime_error("Unknown funct6 in get_mask_funct");
         }
     else
-        throw new std::runtime_error("Unknown funct3 in get_mask_funct");
+        throw std::runtime_error("Unknown funct3 in get_mask_funct");
 }
 template <unsigned VLEN, typename elem_t>
 void mask_vector_vector_op(uint8_t* V, unsigned funct6, unsigned funct3, uint64_t vl, uint64_t vstart, vtype_t vtype, bool vm, unsigned vd,
@@ -661,7 +661,7 @@ std::function<dest_elem_t(src2_elem_t)> get_unary_fn(unsigned unary_op) {
             }
         };
     default:
-        throw new std::runtime_error("Unknown funct in get_unary_fn");
+        throw std::runtime_error("Unknown funct in get_unary_fn");
     }
 }
 template <unsigned VLEN, typename dest_elem_t, typename src2_elem_t>
@@ -693,7 +693,7 @@ template <typename elem_t> std::function<bool(elem_t, elem_t, elem_t)> get_carry
             return vs2 < static_cast<elem_t>(vs1 + carry) || (vs1 == std::numeric_limits<elem_t>::max() && carry);
         };
     default:
-        throw new std::runtime_error("Unknown funct in get_carry_funct");
+        throw std::runtime_error("Unknown funct in get_carry_funct");
     }
 }
 template <unsigned VLEN, typename elem_t>
@@ -853,7 +853,7 @@ std::function<bool(uint64_t, vtype_t, dest_elem_t&, src2_elem_t, src1_elem_t)> g
                 }
             };
         default:
-            throw new std::runtime_error("Unknown funct6 in get_sat_funct");
+            throw std::runtime_error("Unknown funct6 in get_sat_funct");
         }
     else if(funct3 == OPMVV || funct3 == OPMVX)
         switch(funct6) {
@@ -882,10 +882,10 @@ std::function<bool(uint64_t, vtype_t, dest_elem_t&, src2_elem_t, src1_elem_t)> g
                 return 0;
             };
         default:
-            throw new std::runtime_error("Unknown funct6 in get_sat_funct");
+            throw std::runtime_error("Unknown funct6 in get_sat_funct");
         }
     else
-        throw new std::runtime_error("Unknown funct3 in get_sat_funct");
+        throw std::runtime_error("Unknown funct3 in get_sat_funct");
 }
 template <unsigned VLEN, typename dest_elem_t, typename src2_elem_t, typename src1_elem_t>
 bool sat_vector_vector_op(uint8_t* V, unsigned funct6, unsigned funct3, uint64_t vl, uint64_t vstart, vtype_t vtype, int64_t vxrm, bool vm,
@@ -944,7 +944,7 @@ std::function<void(dest_elem_t&, src_elem_t)> get_red_funct(unsigned funct6, uns
                 return running_total += static_cast<dest_elem_t>(sext<dest_elem_t>(vs2));
             };
         default:
-            throw new std::runtime_error("Unknown funct6 in get_red_funct");
+            throw std::runtime_error("Unknown funct6 in get_red_funct");
         }
     else if(funct3 == OPMVV || funct3 == OPMVX)
         switch(funct6) {
@@ -972,10 +972,10 @@ std::function<void(dest_elem_t&, src_elem_t)> get_red_funct(unsigned funct6, uns
                                          static_cast<std::make_signed_t<dest_elem_t>>(static_cast<std::make_signed_t<src_elem_t>>(vs2)));
             };
         default:
-            throw new std::runtime_error("Unknown funct6 in get_red_funct");
+            throw std::runtime_error("Unknown funct6 in get_red_funct");
         }
     else
-        throw new std::runtime_error("Unknown funct3 in get_red_funct");
+        throw std::runtime_error("Unknown funct3 in get_red_funct");
 }
 template <unsigned VLEN, typename dest_elem_t, typename src_elem_t>
 void vector_red_op(uint8_t* V, unsigned funct6, unsigned funct3, uint64_t vl, uint64_t vstart, vtype_t vtype, bool vm, unsigned vd,
@@ -1016,7 +1016,7 @@ template <> constexpr bool isPosZero<uint32_t>(uint32_t x) { return x == 0x00000
 template <> constexpr bool isPosZero<uint64_t>(uint64_t x) { return x == 0x0000000000000000; }
 
 template <typename dest_elem_t, typename src_elem_t> dest_elem_t widen_float(src_elem_t val) {
-    throw new std::runtime_error("Trying to widen a weird 'float'");
+    throw std::runtime_error("Trying to widen a weird 'float'");
 }
 template <> inline uint64_t widen_float<uint64_t, uint32_t>(uint32_t val) { return f32_to_f64(float32_t{val}).v; }
 
@@ -1320,10 +1320,10 @@ std::function<dest_elem_t(uint8_t, uint8_t&, dest_elem_t, src2_elem_t, src1_elem
                 return vs2 ^ (vs1 & sign_mask);
             };
         default:
-            throw new std::runtime_error("Unknown funct6 in get_fp_funct");
+            throw std::runtime_error("Unknown funct6 in get_fp_funct");
         }
     else
-        throw new std::runtime_error("Unknown funct3 in get_fp_funct");
+        throw std::runtime_error("Unknown funct3 in get_fp_funct");
 }
 template <unsigned VLEN, typename dest_elem_t, typename src2_elem_t, typename src1_elem_t>
 void fp_vector_vector_op(uint8_t* V, unsigned funct6, unsigned funct3, uint64_t vl, uint64_t vstart, vtype_t vtype, bool vm, unsigned vd,
@@ -1402,10 +1402,10 @@ std::function<void(uint8_t, uint8_t&, dest_elem_t&, src_elem_t)> get_fp_red_func
                 accrued_flags |= softfloat_exceptionFlags;
             };
         default:
-            throw new std::runtime_error("Unknown funct6 in get_fp_red_funct");
+            throw std::runtime_error("Unknown funct6 in get_fp_red_funct");
         }
     else
-        throw new std::runtime_error("Unknown funct3 in get_fp_red_funct");
+        throw std::runtime_error("Unknown funct3 in get_fp_red_funct");
 }
 template <unsigned VLEN, typename dest_elem_t, typename src_elem_t>
 void fp_vector_red_op(uint8_t* V, unsigned funct6, unsigned funct3, uint64_t vl, uint64_t vstart, vtype_t vtype, bool vm, unsigned vd,
@@ -1495,7 +1495,7 @@ template <typename elem_t> std::function<elem_t(uint8_t, uint8_t&, elem_t)> get_
                 return val;
             };
         default:
-            throw new std::runtime_error("Unknown funct in get_fp_unary_fn");
+            throw std::runtime_error("Unknown funct in get_fp_unary_fn");
         }
     else if(encoding_space == 0b010010) // VFUNARY0
         switch(unary_op) {
@@ -1526,10 +1526,10 @@ template <typename elem_t> std::function<elem_t(uint8_t, uint8_t&, elem_t)> get_
                 return val;
             };
         default:
-            throw new std::runtime_error("Unknown funct in get_fp_unary_fn");
+            throw std::runtime_error("Unknown funct in get_fp_unary_fn");
         }
     else
-        throw new std::runtime_error("Unknown funct in get_fp_unary_fn");
+        throw std::runtime_error("Unknown funct in get_fp_unary_fn");
 }
 template <unsigned VLEN, typename elem_t>
 void fp_vector_unary_op(uint8_t* V, unsigned encoding_space, unsigned unary_op, uint64_t vl, uint64_t vstart, vtype_t vtype, bool vm,
@@ -1554,13 +1554,13 @@ void fp_vector_unary_op(uint8_t* V, unsigned encoding_space, unsigned unary_op, 
 }
 
 template <> inline uint16_t fp_f_to_ui<uint16_t, uint8_t>(uint8_t rm, uint8_t v2) {
-    throw new std::runtime_error("Attempting illegal widening conversion");
+    throw std::runtime_error("Attempting illegal widening conversion");
 }
 template <> inline uint32_t fp_f_to_ui<uint32_t, uint16_t>(uint8_t rm, uint16_t v2) { return f16toui32(v2, rm); }
 template <> inline uint64_t fp_f_to_ui<uint64_t, uint32_t>(uint8_t rm, uint32_t v2) { return f32toui64(v2, rm); }
 
 template <> inline uint16_t fp_f_to_i<uint16_t, uint8_t>(uint8_t rm, uint8_t v2) {
-    throw new std::runtime_error("Attempting illegal widening conversion");
+    throw std::runtime_error("Attempting illegal widening conversion");
 }
 template <> inline uint32_t fp_f_to_i<uint32_t, uint16_t>(uint8_t rm, uint16_t v2) { return f16toi32(v2, rm); }
 template <> inline uint64_t fp_f_to_i<uint64_t, uint32_t>(uint8_t rm, uint32_t v2) { return f32toi64(v2, rm); }
@@ -1574,7 +1574,7 @@ template <> inline uint32_t fp_i_to_f<uint32_t, uint16_t>(uint8_t rm, uint16_t v
 template <> inline uint64_t fp_i_to_f<uint64_t, uint32_t>(uint8_t rm, uint32_t v2) { return i32tof64(v2, rm); }
 
 template <> inline uint16_t fp_f_to_f<uint16_t, uint8_t>(uint8_t rm, uint8_t val) {
-    throw new std::runtime_error("Attempting illegal widening conversion");
+    throw std::runtime_error("Attempting illegal widening conversion");
 }
 template <> inline uint32_t fp_f_to_f<uint32_t, uint16_t>(uint8_t rm, uint16_t val) { return f16tof32(val, rm); }
 template <> inline uint64_t fp_f_to_f<uint64_t, uint32_t>(uint8_t rm, uint32_t val) { return f32tof64(val, rm); }
@@ -1615,7 +1615,7 @@ std::function<dest_elem_t(uint8_t, uint8_t&, src_elem_t)> get_fp_widening_fn(uns
             return val;
         };
     default:
-        throw new std::runtime_error("Unknown funct in get_fp_unary_fn");
+        throw std::runtime_error("Unknown funct in get_fp_unary_fn");
     }
 }
 template <unsigned VLEN, typename dest_elem_t, typename src_elem_t>
@@ -1649,19 +1649,19 @@ template <> inline uint16_t fp_f_to_i<uint16_t, uint32_t>(uint8_t rm, uint32_t v
 template <> inline uint32_t fp_f_to_i<uint32_t, uint64_t>(uint8_t rm, uint64_t v2) { return f64toi32(v2, rm); }
 
 template <> inline uint8_t fp_ui_to_f<uint8_t, uint16_t>(uint8_t rm, uint16_t v2) {
-    throw new std::runtime_error("Attempting illegal narrowing conversion");
+    throw std::runtime_error("Attempting illegal narrowing conversion");
 }
 template <> inline uint16_t fp_ui_to_f<uint16_t, uint32_t>(uint8_t rm, uint32_t v2) { return ui32tof16(v2, rm); }
 template <> inline uint32_t fp_ui_to_f<uint32_t, uint64_t>(uint8_t rm, uint64_t v2) { return ui64tof32(v2, rm); }
 
 template <> inline uint8_t fp_i_to_f<uint8_t, uint16_t>(uint8_t rm, uint16_t v2) {
-    throw new std::runtime_error("Attempting illegal narrowing conversion");
+    throw std::runtime_error("Attempting illegal narrowing conversion");
 }
 template <> inline uint16_t fp_i_to_f<uint16_t, uint32_t>(uint8_t rm, uint32_t v2) { return i32tof16(v2, rm); }
 template <> inline uint32_t fp_i_to_f<uint32_t, uint64_t>(uint8_t rm, uint64_t v2) { return i64tof32(v2, rm); }
 
 template <> inline uint8_t fp_f_to_f<uint8_t, uint16_t>(uint8_t rm, uint16_t val) {
-    throw new std::runtime_error("Attempting illegal narrowing conversion");
+    throw std::runtime_error("Attempting illegal narrowing conversion");
 }
 template <> inline uint16_t fp_f_to_f<uint16_t, uint32_t>(uint8_t rm, uint32_t val) { return f32tof16(val, rm); }
 template <> inline uint32_t fp_f_to_f<uint32_t, uint64_t>(uint8_t rm, uint64_t val) { return f64tof32(val, rm); }
@@ -1702,7 +1702,7 @@ std::function<dest_elem_t(uint8_t, uint8_t&, src_elem_t)> get_fp_narrowing_fn(un
             return val;
         };
     default:
-        throw new std::runtime_error("Unknown funct in get_fp_narrowing_fn");
+        throw std::runtime_error("Unknown funct in get_fp_narrowing_fn");
     }
 }
 template <unsigned VLEN, typename dest_elem_t, typename src_elem_t>
@@ -1777,7 +1777,7 @@ template <typename elem_t> std::function<bool(uint8_t, uint8_t&, elem_t, elem_t)
             return val;
         };
     default:
-        throw new std::runtime_error("Unknown funct6 in get_fp_mask_funct");
+        throw std::runtime_error("Unknown funct6 in get_fp_mask_funct");
     }
 }
 template <unsigned VLEN, typename elem_t>
@@ -1893,7 +1893,7 @@ inline std::function<bool(bool&, bool)> get_mask_set_funct(unsigned enc) {
                 return 1;
         };
     default:
-        throw new std::runtime_error("Unknown enc in get_mask_set_funct");
+        throw std::runtime_error("Unknown enc in get_mask_set_funct");
     }
 }
 template <unsigned VLEN> void mask_set_op(uint8_t* V, unsigned enc, uint64_t vl, uint64_t vstart, bool vm, unsigned vd, unsigned vs2) {
@@ -2211,7 +2211,7 @@ template <typename T> std::function<void(vreg_view<T>&, vreg_view<T>&, vreg_view
             vd_view[3] = W19;
         };
     default:
-        throw new std::runtime_error("Unsupported operation in get_crypto_funct");
+        throw std::runtime_error("Unsupported operation in get_crypto_funct");
     }
 }
 template <unsigned VLEN, unsigned EGS, typename elem_type_t>
