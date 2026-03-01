@@ -133,7 +133,7 @@ uint64_t vector_load_store(void* core, std::function<bool(void*, uint64_t, uint6
                            bool use_stride) {
     unsigned vlmax = VLEN * vtype.lmul() / vtype.sew();
     auto emul_stride = std::max<unsigned>(vlmax, VLEN / (sizeof(eew_t) * 8));
-    auto vd_view = get_vreg<VLEN, eew_t>(V, vd, emul_stride * segment_size);
+    auto vd_view = get_vreg<VLEN, eew_t>(V, vd, std::max<uint64_t>(vl, emul_stride * segment_size));
     vmask_view mask_reg = read_vmask(V, VLEN, vlmax);
     for(size_t idx = vstart; idx < vl; idx++) {
         bool mask_active = vm ? 1 : mask_reg[idx];
